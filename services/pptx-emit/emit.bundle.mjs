@@ -15434,12 +15434,13 @@ async function emitPptx(slides2, outPath, fontMode = "universal", title = "slide
   await pptx.writeFile({ fileName: outPath });
 }
 function emitRect(s, r) {
+  const fill = r.fill ? typeof r.fillAlpha === "number" && r.fillAlpha < 1 ? { color: r.fill, transparency: Math.round((1 - r.fillAlpha) * 100) } : { color: r.fill } : { type: "none" };
   const opts = {
     x: px(r.x),
     y: px(r.y),
     w: px(r.w),
     h: px(r.h),
-    fill: r.fill ? { color: r.fill } : { type: "none" },
+    fill,
     line: r.stroke && (r.strokeW || 0) >= 0.5 ? { color: r.stroke, width: r.strokeW } : { type: "none" }
   };
   if (r.shadow) opts.shadow = r.shadow;
