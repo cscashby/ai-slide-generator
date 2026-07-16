@@ -4,7 +4,7 @@
 // pptxgenjs. Record shape matches the scaffold reference design:
 //   { slides: [ { width, height, records, notes? } ], title?, font_mode? }
 // where each record is one of:
-//   { kind: 'rect',  x, y, w, h, fill, stroke?, strokeW?, radius? }
+//   { kind: 'rect',  x, y, w, h, fill, fillAlpha?, stroke?, strokeW?, radius? }
 //   { kind: 'image', x, y, w, h, src }   // src: dataURL or http(s)
 //   { kind: 'text',  x, y, w, h, runs: [{text, bold, italic, color, size, family, breakLine?, underline?}], align, valign }
 // Walker produces records in paint order (pre-order DOM walk); we emit in that
@@ -66,9 +66,17 @@ export async function emitPptx(slides, outPath, fontMode = 'universal', title = 
 }
 
 function emitRect(s, r) {
+  // pptxgenjs fill transparency is a 0-100 percentage (100 = fully transparent),
+  // so a CSS fill alpha of 0.08 → transparency 92. Preserves faint tints/washes
+  // instead of rendering them as an opaque block.
+  const fill = r.fill
+    ? (typeof r.fillAlpha === 'number' && r.fillAlpha < 1
+        ? { color: r.fill, transparency: Math.round((1 - r.fillAlpha) * 100) }
+        : { color: r.fill })
+    : { type: 'none' };
   const opts = {
     x: px(r.x), y: px(r.y), w: px(r.w), h: px(r.h),
-    fill: r.fill ? { color: r.fill } : { type: 'none' },
+    fill,
     line: r.stroke && (r.strokeW || 0) >= 0.5
       ? { color: r.stroke, width: r.strokeW }
       : { type: 'none' },

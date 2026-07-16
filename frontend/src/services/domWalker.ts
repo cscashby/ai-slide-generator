@@ -43,6 +43,7 @@ export interface RectRecord {
   kind: 'rect';
   x: number; y: number; w: number; h: number;
   fill: string | null;
+  fillAlpha?: number;
   stroke?: string | null;
   strokeW?: number;
   radius?: number;
@@ -461,6 +462,9 @@ const WALKER_SOURCE = `
             kind: 'rect',
             x: box.x, y: box.y, w: box.w, h: box.h,
             fill: fill ? fill.hex : null,
+            // Preserve fill translucency (e.g. a rgba(...,0.08) coral wash). Without this the
+            // hex alone renders as a solid block — a faint tint becomes an opaque rectangle.
+            fillAlpha: fill ? fill.alpha : undefined,
             stroke: borderW > 0 && borderColor ? borderColor.hex : null,
             strokeW: borderW,
             radius: parseRadius(cs),
