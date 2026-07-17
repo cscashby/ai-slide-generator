@@ -104,3 +104,6 @@ token.json
 .openskills/
 AGENTS.md
 prpm.lock
+
+# Local first-run marker (created by tellr_cli on first start)
+.db_initialized
